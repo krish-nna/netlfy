@@ -17,14 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // File input change to display chosen file name
     const fileInput = document.getElementById("upload-file");
     const fileNameDisplay = document.getElementById("file-name");
-    if(fileInput && fileNameDisplay) {
-      fileInput.addEventListener("change", () => {
-          if (fileInput.files.length > 0) {
-              fileNameDisplay.textContent = fileInput.files[0].name;
-          } else {
-              fileNameDisplay.textContent = "";
-          }
-      });
+    if (fileInput && fileNameDisplay) {
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        });
     }
 
     // Get new filter elements by new IDs:
@@ -202,51 +202,48 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Handle form submission (update)
-   // Handle form submission (update)
-modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
-    ev.preventDefault();
-    console.log("Edit form submitted"); // Debug log
-    const formData = new FormData(this);
-    console.log("FormData:", formData); // Debug log
-  fetch("https://rnder-8p34.onrender.com/update_students.php", {
-    method: "POST",
-    body: formData
-})
-
-        .then(response => {
-            console.log("Update response:", response); // Debug log
-            return response.json();
-        })
-        .then(data => {
-            console.log("Update data:", data); // Debug log
-            if (data.success) {
-                modal.remove();
-                fetchStudents();
-            } else {
-                showError(data.error);
-            }
-        })
-        .catch(err => {
-            console.error("Update error:", err); // Debug log
-            showError("Error updating student");
+        modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            console.log("Edit form submitted"); // Debug log
+            const formData = new FormData(this);
+            console.log("FormData:", formData); // Debug log
+            fetch("https://rnder-8p34.onrender.com/update_students.php", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    console.log("Update response:", response); // Debug log
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Update data:", data); // Debug log
+                    if (data.success) {
+                        modal.remove();
+                        fetchStudents();
+                    } else {
+                        showError(data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error("Update error:", err); // Debug log
+                    showError("Error updating student");
+                });
         });
-});
 
         // Handle deletion
         modal.querySelector("#delete-btn").addEventListener("click", function () {
             console.log("Delete button clicked");
             console.log("TID to delete:", tid);
-        
+
             if (confirm("Are you sure you want to delete this student?")) {
                 const formData = new FormData();
                 formData.append("tid", tid);
                 console.log("Delete FormData:", formData);
-        
-              fetch("https://rnder-8p34.onrender.com/delete_students.php", {
-    method: "POST",
-    body: formData
-})
 
+                fetch("https://rnder-8p34.onrender.com/delete_students.php", {
+                    method: "POST",
+                    body: formData
+                })
                     .then(response => {
                         console.log("Delete response:", response);
                         return response.json();
@@ -295,11 +292,10 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
 
         console.log("FormData:", formData);
 
-fetch("https://rnder-8p34.onrender.com/save_students.php", {
-    method: "POST",
-    body: formData
-})
-
+        fetch("https://rnder-8p34.onrender.com/save_students.php", {
+            method: "POST",
+            body: formData
+        })
             .then(response => {
                 console.log("Fetch response received:", response);
                 return response.json();

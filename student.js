@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rank = filterRank.value === "top3" ? "top3" : "all"; // Handle rank filter
 
         const query = `compId=${competitionId}&filter_class=${encodeURIComponent(cls)}&filter_rank=${encodeURIComponent(rank)}`;
-        fetch("fetch_students.php?" + query)
+        fetch("https://rnder-8p34.onrender.com/fetch_students.php?" + query)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -208,10 +208,11 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
     console.log("Edit form submitted"); // Debug log
     const formData = new FormData(this);
     console.log("FormData:", formData); // Debug log
-    fetch("update_students.php", {
-        method: "POST",
-        body: formData
-    })
+  fetch("https://rnder-8p34.onrender.com/update_students.php", {
+    method: "POST",
+    body: formData
+})
+
         .then(response => {
             console.log("Update response:", response); // Debug log
             return response.json();
@@ -241,10 +242,11 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
                 formData.append("tid", tid);
                 console.log("Delete FormData:", formData);
         
-                fetch("delete_students.php", {
-                    method: "POST",
-                    body: formData
-                })
+              fetch("https://rnder-8p34.onrender.com/delete_students.php", {
+    method: "POST",
+    body: formData
+})
+
                     .then(response => {
                         console.log("Delete response:", response);
                         return response.json();
@@ -293,10 +295,11 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
 
         console.log("FormData:", formData);
 
-        fetch("save_students.php", {
-            method: "POST",
-            body: formData
-        })
+fetch("https://rnder-8p34.onrender.com/save_students.php", {
+    method: "POST",
+    body: formData
+})
+
             .then(response => {
                 console.log("Fetch response received:", response);
                 return response.json();

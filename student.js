@@ -38,6 +38,30 @@ document.addEventListener("DOMContentLoaded", () => {
     filterClass.addEventListener("change", fetchStudents);
     filterRank.addEventListener("change", fetchStudents);
 
+    fetch("https://rnder-8p34.onrender.com/save_students.php", {
+    method: "POST",
+    body: formData
+})
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error("Server returned: " + text);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Server response data:", data);
+        if (data.success) {
+            fetchStudents(); // Refresh the student list after upload
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        showError("Error uploading file.");
+    });
     // Function to fetch students from the server based on filters and competition id
     function fetchStudents() {
         const cls = filterClass.value !== "all" ? filterClass.value : "";

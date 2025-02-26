@@ -34,7 +34,7 @@ function addCompetition() {
     return;
   }
 
-  fetch("save_competition.php", {
+ fetch("https://rnder-8p34.onrender.com/save_competition.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: compName, category: compCategory, college: compCollege, year: compYear })
@@ -55,7 +55,7 @@ function resetForm() {
 }
 
 function fetchCompetitions() {
-  fetch("fetch_competitions.php")
+  fetch("https://rnder-8p34.onrender.com/fetch_competitions.php")
     .then(response => {
       if (!response.ok) {
         throw new Error("Network response was not ok");

@@ -1,4 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+        const downloadBtn = document.getElementById("download-btn");
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", () => {
+            console.log("Download button clicked!");
+
+            const competitionId = new URLSearchParams(window.location.search).get("compId");
+            if (!competitionId) {
+                console.error("Competition ID is missing!");
+                alert("Competition ID is required to download the template.");
+                return;
+            }
+
+            const downloadUrl = `download_template.php?compId=${competitionId}`;
+            console.log("Download URL:", downloadUrl);
+
+            window.location.href = downloadUrl;
+        });
+    }
     // Get competition id from URL (using ?compId=xxx)
     const urlParams = new URLSearchParams(window.location.search);
     const competitionId = urlParams.get('compId');

@@ -12,8 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const downloadUrl = `download_template.php?compId=${competitionId}`;
-            console.log("Download URL:", downloadUrl);
+const downloadUrl = `https://rnder-8p34.onrender.com/download_template.php?compId=${competitionId}`;
+window.location.href = downloadUrl;
+
 
             window.location.href = downloadUrl;
         });

@@ -41,27 +41,80 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to fetch students from the server based on filters and competition id
     function fetchStudents() {
         const cls = filterClass.value !== "all" ? filterClass.value : "";
-        const rank = filterRank.value === "top3" ? "top3" : "all"; // Handle rank filter
-
-        const query = `compId=${competitionId}&filter_class=${encodeURIComponent(cls)}&filter_rank=${encodeURIComponent(rank)}`;
+        const rank = filterRank.value === "top3" ? "top3" : "all";
+    
+        const query = `id=${competitionId}&filter_class=${encodeURIComponent(cls)}&filter_rank=${encodeURIComponent(rank)}`; // Changed from "compId" to "id"
         fetch("https://rnder-8p34.onrender.com/fetch_students.php?" + query)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     renderStudents(data.students);
-                    // If master list is empty, populate it with all classes from fetched data.
                     if (masterClassList.size === 0) {
                         data.students.forEach(student => masterClassList.add(student.class));
                         updateClassDropdown([...masterClassList]);
                     }
                 } else {
-                    showError(data.error);
+                    showError(data.error || "Failed to fetch students.");
                 }
             })
             .catch(err => {
-                showError("Error fetching students");
+                console.error("Fetch error:", err);
+                showError("Failed to fetch students. Please try again.");
             });
     }
+
+
+
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const fileInput = document.getElementById('excelFile');
+        if (!fileInput.files.length) {
+            alert("Please select a file.");
+            return;
+        }
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const competitionId = urlParams.get('compId');
+        if (!competitionId || isNaN(competitionId)) {
+            alert("Invalid Competition ID!");
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append("excel_file", fileInput.files[0]);
+        formData.append("id", competitionId); // Changed from "competition_id" to "id"
+        
+        try {
+            const response = await fetch('https://rnder-8p34.onrender.com/save_students.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log("Server Response:", result);
+            
+            if (result.success) {
+                alert("Students uploaded successfully!");
+                fetchStudents(); // Refresh the student list
+            } else {
+                alert("Error: " + (result.error || "Unknown error occurred."));
+            }
+        } catch (error) {
+            console.error("Upload failed:", error);
+            alert("Upload failed. Please try again.");
+        }
+    });
+
 
     // Function to transform rank for display
     function getRankDisplay(rank) {
@@ -270,55 +323,53 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
 
     // Handle Excel file upload
     function handleFileUpload() {
-        console.log("handleFileUpload function called!");
-
         const fileInput = document.getElementById("upload-file");
-        console.log("File input element:", fileInput);
-
         if (!fileInput) {
             console.error("File input not found!");
             showError("File input element is missing.");
             return;
         }
-
+    
         const file = fileInput.files[0];
-        console.log("Selected file:", file);
-
         if (!file) {
             showError("Please choose an Excel file to upload.");
             return;
         }
-
+    
+        const urlParams = new URLSearchParams(window.location.search);
+        const competitionId = urlParams.get('compId');
+        if (!competitionId || isNaN(competitionId)) {
+            showError("Invalid Competition ID!");
+            return;
+        }
+    
         const formData = new FormData();
         formData.append("excel_file", file);
-        formData.append("id", competitionId);
-
-        console.log("FormData:", formData);
-
-fetch("https://rnder-8p34.onrender.com/save_students.php", {
-    method: "POST",
-    body: formData
-})
-
-            .then(response => {
-                console.log("Fetch response received:", response);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Server response data:", data);
-                if (data.success) {
-                    fetchStudents(); // Refresh the student list after upload
-                } else {
-                    showError(data.error);
-                }
-            })
-            .catch((err) => {
-                console.error("Fetch error:", err);
-                showError("Error uploading file.");
-            });
+        formData.append("id", competitionId); // Changed from "competition_id" to "id"
+    
+        fetch("https://rnder-8p34.onrender.com/save_students.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                fetchStudents(); // Refresh the student list
+            } else {
+                showError(data.error || "Failed to upload file.");
+            }
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            showError("Error uploading file. Please try again.");
+        });
     }
 
     // Initially fetch students for the competition
     fetchStudents();
 });
-

@@ -291,7 +291,7 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
 
         const formData = new FormData();
         formData.append("excel_file", file);
-        formData.append("competition_id", competitionId);
+        formData.append("id", competitionId);
 
         console.log("FormData:", formData);
 

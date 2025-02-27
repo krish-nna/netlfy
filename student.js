@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const competitionId = urlParams.get('compId');
     console.log("Competition ID:", competitionId);
 
+    if (!competitionId) {
+        console.error("Competition ID not found in URL!");
+        showError("Competition ID is missing.");
+        return;
+    }
+
     // Add event listener for the upload button
     const uploadBtn = document.getElementById("upload-btn");
     if (uploadBtn) {
@@ -17,14 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // File input change to display chosen file name
     const fileInput = document.getElementById("upload-file");
     const fileNameDisplay = document.getElementById("file-name");
-    if(fileInput && fileNameDisplay) {
-      fileInput.addEventListener("change", () => {
-          if (fileInput.files.length > 0) {
-              fileNameDisplay.textContent = fileInput.files[0].name;
-          } else {
-              fileNameDisplay.textContent = "";
-          }
-      });
+    if (fileInput && fileNameDisplay) {
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        });
     }
 
     // Get new filter elements by new IDs:
@@ -35,8 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let masterClassList = new Set();
 
     // Update event listeners for filters
-    filterClass.addEventListener("change", fetchStudents);
-    filterRank.addEventListener("change", fetchStudents);
+    if (filterClass && filterRank) {
+        filterClass.addEventListener("change", fetchStudents);
+        filterRank.addEventListener("change", fetchStudents);
+    }
 
     // Function to fetch students from the server based on filters and competition id
     function fetchStudents() {
@@ -45,7 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const query = `compId=${competitionId}&filter_class=${encodeURIComponent(cls)}&filter_rank=${encodeURIComponent(rank)}`;
         fetch("https://rnder-8p34.onrender.com/fetch_students.php?" + query)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok: " + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     renderStudents(data.students);
@@ -59,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             })
             .catch(err => {
+                console.error("Fetch error:", err);
                 showError("Error fetching students");
             });
     }
@@ -82,6 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to render student tiles
     function renderStudents(students) {
         const container = document.getElementById("categoryTiles");
+        if (!container) {
+            console.error("Container for student tiles not found!");
+            return;
+        }
         container.innerHTML = ""; // Clear previous tiles
         students.forEach(student => {
             const rankInfo = getRankDisplay(student.rank_status);
@@ -114,6 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to update the class dropdown using the master list
     function updateClassDropdown(classes) {
+        if (!filterClass) {
+            console.error("Filter class dropdown not found!");
+            return;
+        }
         // Clear previous options and add default "All Classes"
         filterClass.innerHTML = `<option value="all">All Classes</option>`;
         classes.forEach(cls => {
@@ -127,10 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to show errors
     function showError(message) {
         const errorDiv = document.getElementById("error-message");
-        errorDiv.textContent = message;
-        setTimeout(() => {
-            errorDiv.textContent = "";
-        }, 5000);
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            setTimeout(() => {
+                errorDiv.textContent = "";
+            }, 5000);
+        } else {
+            console.error("Error message div not found!");
+        }
     }
 
     // Function to open the edit modal and prefill with student data
@@ -202,68 +228,65 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Handle form submission (update)
-   // Handle form submission (update)
-modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
-    ev.preventDefault();
-    console.log("Edit form submitted"); // Debug log
-    const formData = new FormData(this);
-    console.log("FormData:", formData); // Debug log
-  fetch("https://rnder-8p34.onrender.com/update_students.php", {
-    method: "POST",
-    body: formData
-})
-
-        .then(response => {
-            console.log("Update response:", response); // Debug log
-            return response.json();
-        })
-        .then(data => {
-            console.log("Update data:", data); // Debug log
-            if (data.success) {
-                modal.remove();
-                fetchStudents();
-            } else {
-                showError(data.error);
-            }
-        })
-        .catch(err => {
-            console.error("Update error:", err); // Debug log
-            showError("Error updating student");
+        modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            console.log("Edit form submitted"); // Debug log
+            const formData = new FormData(this);
+            console.log("FormData:", formData); // Debug log
+            fetch("https://rnder-8p34.onrender.com/update_students.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                console.log("Update response:", response); // Debug log
+                return response.json();
+            })
+            .then(data => {
+                console.log("Update data:", data); // Debug log
+                if (data.success) {
+                    modal.remove();
+                    fetchStudents();
+                } else {
+                    showError(data.error);
+                }
+            })
+            .catch(err => {
+                console.error("Update error:", err); // Debug log
+                showError("Error updating student");
+            });
         });
-});
 
         // Handle deletion
         modal.querySelector("#delete-btn").addEventListener("click", function () {
             console.log("Delete button clicked");
             console.log("TID to delete:", tid);
-        
+
             if (confirm("Are you sure you want to delete this student?")) {
                 const formData = new FormData();
                 formData.append("tid", tid);
                 console.log("Delete FormData:", formData);
-        
-              fetch("https://rnder-8p34.onrender.com/delete_students.php", {
-    method: "POST",
-    body: formData
-})
 
-                    .then(response => {
-                        console.log("Delete response:", response);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Delete data:", data);
-                        if (data.success) {
-                            modal.remove();
-                            fetchStudents();
-                        } else {
-                            showError(data.error);
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Delete error:", err);
-                        showError("Error deleting student");
-                    });
+                fetch("https://rnder-8p34.onrender.com/delete_students.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    console.log("Delete response:", response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Delete data:", data);
+                    if (data.success) {
+                        modal.remove();
+                        fetchStudents();
+                    } else {
+                        showError(data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error("Delete error:", err);
+                    showError("Error deleting student");
+                });
             }
         });
     }
@@ -291,33 +314,34 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
 
         const formData = new FormData();
         formData.append("excel_file", file);
-        formData.append("id", competitionId);
+        formData.append("competition_id", competitionId); // Use the correct key
 
         console.log("FormData:", formData);
         console.log("Competition ID:", competitionId);
         console.log("FormData entries:", [...formData.entries()]);
-        
-fetch("https://rnder-8p34.onrender.com/save_students.php", {
-    method: "POST",
-    body: formData
-})
 
-            .then(response => {
-                console.log("Fetch response received:", response);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Server response data:", data);
-                if (data.success) {
-                    fetchStudents(); // Refresh the student list after upload
-                } else {
-                    showError(data.error);
-                }
-            })
-            .catch((err) => {
-                console.error("Fetch error:", err);
-                showError("Error uploading file.");
-            });
+        fetch("https://rnder-8p34.onrender.com/save_students.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok: " + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Server response data:", data);
+            if (data.success) {
+                fetchStudents(); // Refresh the student list after upload
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch((err) => {
+            console.error("Fetch error:", err);
+            showError("Error uploading file.");
+        });
     }
 
     // Initially fetch students for the competition

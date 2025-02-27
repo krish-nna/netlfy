@@ -289,55 +289,61 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
     }
 
     // Handle Excel file upload
-    function handleFileUpload() {
-        console.log("handleFileUpload function called!");
+   function handleFileUpload() {
+    console.log("handleFileUpload function called!");
 
-        const fileInput = document.getElementById("upload-file");
-        console.log("File input element:", fileInput);
+    const fileInput = document.getElementById("upload-file");
+    console.log("File input element:", fileInput);
 
-        if (!fileInput) {
-            console.error("File input not found!");
-            showError("File input element is missing.");
-            return;
-        }
-
-        const file = fileInput.files[0];
-        console.log("Selected file:", file);
-
-        if (!file) {
-            showError("Please choose an Excel file to upload.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("excel_file", file);
-        formData.append("competition_id", competitionId);
-
-        console.log("FormData:", formData);
-
-fetch("https://rnder-8p34.onrender.com/save_students.php", {
-    method: "POST",
-    body: formData
-})
-
-            .then(response => {
-                console.log("Fetch response received:", response);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Server response data:", data);
-                if (data.success) {
-                    fetchStudents(); // Refresh the student list after upload
-                } else {
-                    showError(data.error);
-                }
-            })
-            .catch((err) => {
-                console.error("Fetch error:", err);
-                showError("Error uploading file.");
-            });
+    if (!fileInput) {
+        console.error("File input not found!");
+        showError("File input element is missing.");
+        return;
     }
 
+    const file = fileInput.files[0];
+    console.log("Selected file:", file);
+
+    if (!file) {
+        showError("Please choose an Excel file to upload.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("excel_file", file);
+    formData.append("competition_id", competitionId);
+
+    // Log FormData contents
+    for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
+
+    fetch("https://rnder-8p34.onrender.com/save_students.php", {
+        method: "POST",
+        body: formData
+    })
+        .then(response => {
+            console.log("Fetch response received:", response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json().catch(() => {
+                throw new Error("Invalid JSON response from server.");
+            });
+        })
+        .then(data => {
+            console.log("Server response data:", data);
+            if (data.success) {
+                fetchStudents(); // Refresh the student list after upload
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch((err) => {
+            console.error("Fetch error:", err);
+            showError("Error uploading file: " + err.message);
+        });
+}
     // Initially fetch students for the competition
     fetchStudents();
 });

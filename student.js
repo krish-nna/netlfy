@@ -294,7 +294,9 @@ modal.querySelector("#edit-form").addEventListener("submit", function (ev) {
         formData.append("id", competitionId);
 
         console.log("FormData:", formData);
-
+        console.log("Competition ID:", competitionId);
+        console.log("FormData entries:", [...formData.entries()]);
+        
 fetch("https://rnder-8p34.onrender.com/save_students.php", {
     method: "POST",
     body: formData

@@ -100,37 +100,93 @@ window.location.href = downloadUrl;
     }
 
     // Function to render student tiles
-    function renderStudents(students) {
-        const container = document.getElementById("categoryTiles");
-        container.innerHTML = ""; // Clear previous tiles
-        students.forEach(student => {
-            const rankInfo = getRankDisplay(student.rank_status);
-            const tile = document.createElement("div");
-            tile.classList.add("tile");
-            tile.innerHTML = `
-                <div class="student-card">
-                    <p class="student-name"><u>${student.name}</u></p>
-                    <p class="student-id"><strong>Student ID:</strong> ${student.student_id}</p>
-                    <p class="student-class"><strong>Class:</strong> ${student.class}</p>
-                    <p class="student-division"><strong>Division:</strong> ${student.division}</p>
-                    <p class="student-rollno"><strong>Roll No:</strong> ${student.rollno}</p>
-                    <div class="rank-container">
-                        <span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span>
-                    </div>
-                    <p class="email"><strong>Email:</strong> ${student.email}</p>
-                    <p class="student-phone"><strong>Phone:</strong> ${student.phno}</p>
-                    <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
-                        <img class="edit" src="edit.png" alt="Edit">
-                    </div>
+    // function renderStudents(students) {
+    //     const container = document.getElementById("categoryTiles");
+    //     container.innerHTML = ""; // Clear previous tiles
+    //     students.forEach(student => {
+    //         const rankInfo = getRankDisplay(student.rank_status);
+    //         const tile = document.createElement("div");
+    //         tile.classList.add("tile");
+    //         tile.innerHTML = `
+    //             <div class="student-card">
+    //                 <p class="student-name"><u>${student.name}</u></p>
+    //                 <p class="student-id"><strong>Student ID:</strong> ${student.student_id}</p>
+    //                 <p class="student-class"><strong>Class:</strong> ${student.class}</p>
+    //                 <p class="student-division"><strong>Division:</strong> ${student.division}</p>
+    //                 <p class="student-rollno"><strong>Roll No:</strong> ${student.rollno}</p>
+    //                 <div class="rank-container">
+    //                     <span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span>
+    //                 </div>
+    //                 <p class="email"><strong>Email:</strong> ${student.email}</p>
+    //                 <p class="student-phone"><strong>Phone:</strong> ${student.phno}</p>
+    //                 <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
+    //                     <img class="edit" src="edit.png" alt="Edit">
+    //                 </div>
+    //             </div>
+    //         `;
+    //         container.appendChild(tile);
+    //     });
+    //     // Bind edit button click events
+    //     document.querySelectorAll(".edit-btn").forEach(btn => {
+    //         btn.addEventListener("click", openEditModal);
+    //     });
+    // }
+
+        function renderStudents(students) {
+    const container = document.getElementById("categoryTiles");
+    container.innerHTML = ""; // Clear previous content
+
+    // Create the table and its header
+    const table = document.createElement("table");
+    table.classList.add("students-table");
+
+    const headerRow = document.createElement("tr");
+    headerRow.innerHTML = `
+        <th>Name</th>
+        <th>Student ID</th>
+        <th>Class</th>
+        <th>Division</th>
+        <th>Roll No</th>
+        <th>Rank</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Edit</th>
+    `;
+    table.appendChild(headerRow);
+
+    // Add a row for each student
+    students.forEach(student => {
+        const rankInfo = getRankDisplay(student.rank_status);
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td><u>${student.name}</u></td>
+            <td>${student.student_id}</td>
+            <td>${student.class}</td>
+            <td>${student.division}</td>
+            <td>${student.rollno}</td>
+            <td><span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span></td>
+            <td>${student.email}</td>
+            <td>${student.phno}</td>
+            <td>
+                <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
+                    <img class="edit" src="edit.png" alt="Edit">
                 </div>
-            `;
-            container.appendChild(tile);
-        });
-        // Bind edit button click events
-        document.querySelectorAll(".edit-btn").forEach(btn => {
-            btn.addEventListener("click", openEditModal);
-        });
-    }
+            </td>
+        `;
+
+        table.appendChild(row);
+    });
+
+    // Append the table to the container
+    container.appendChild(table);
+
+    // Bind edit button click events
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", openEditModal);
+    });
+}
+
 
     // Function to update the class dropdown using the master list
     function updateClassDropdown(classes) {

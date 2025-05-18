@@ -1,22 +1,4 @@
-<!-- <?php
-error_log("Starting index.php");
 
-// Include the database configuration
-require_once 'db_config.php';
-error_log("Database configuration included");
-
-// Fetch data from the database
-try {
-    error_log("Attempting to fetch data from the database");
-    $stmt = $conn->prepare("SELECT * FROM stdata");
-    $stmt->execute();
-    $students = $stmt->fetchAll();
-    error_log("Data fetched successfully");
-} catch (PDOException $e) {
-    error_log("Database error: " . $e->getMessage());
-    die("Database error: " . $e->getMessage());
-}
-?> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,10 +42,14 @@ try {
       <select id="filterYear">
         <option value="all">All Years</option>
       </select>
-    </div>
+    </div> 
 
     <div class="competition-dashboard">
-      <h2>Competition Dashboard</h2>
+      <div class="competition-dashboard-head">
+      <h2 class="index_heading">Competition Dashboard</h2>
+    
+      <button type="button" class="add-category-btn">Add Competition</button>
+    </div>
       <div class="category-tiles" id="categoryTiles">
         <?php if (empty($students)): ?>
           <p>No students found.</p>
@@ -78,11 +64,10 @@ try {
           </ul>
         <?php endif; ?>
       </div>
+      
     </div>
 
-    <div class="add-competition-container">
-      <button type="button" class="add-category-btn">Add Competition</button>
-    </div>
+    
   </main>
 
   <div id="competitionModal" class="modal">

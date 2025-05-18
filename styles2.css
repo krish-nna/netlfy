@@ -97,7 +97,8 @@ main.mcont {
 
 .filters {
   flex: 1;
-  max-width: 250px;
+  min-width: 20%;
+  max-width: 25%;
   padding: 20px;
   background-color: #f0f0f0;
   border-radius: 10px;
@@ -137,30 +138,7 @@ main.mcont {
   margin-bottom: 20px;
 }
 
-.add-category-btn {
-  display: inline-block;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  background: #ffffff;
-  color: rgb(212, 4, 4);
-  border-style:solid ;
-  border-width: 1px;
-  border-color:rgb(212, 4, 4);
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
-.add-category-btn:hover {
-  background: #df2a2a;
-  transform: translateY(-2px);
-  color: #ffffff;
-}
-
-.add-category-btn:active {
-  transform: translateY(0);
-}
 
 .category-tiles {
   display: grid;
@@ -365,3 +343,41 @@ main.mcont {
   .home:hover{
     color: #514c4c;
     }
+
+  .index_heading{
+    /* display: inline-block; */
+    
+  }
+
+  .add-category-btn {
+  /* display: inline-block; */
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: rgb(212, 4, 4);
+  border-style:solid ;
+  border-width: 1px;
+  border-color:rgb(212, 4, 4);
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-left: auto;
+  
+}
+
+.add-category-btn:hover {
+  background: #df2a2a;
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.add-category-btn:active {
+  transform: translateY(0);
+}
+.competition-dashboard-head{
+
+  display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}

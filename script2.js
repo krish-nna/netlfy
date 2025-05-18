@@ -1,8 +1,9 @@
 console.log("Script loaded! Checking modal elements...");
 
 let categories = [];
+let categorySuggestions = [];
+let collegeSuggestions = [];
 
-// Define all functions first
 function setupModalHandlers() {
   const addCategoryBtn = document.querySelector(".add-category-btn");
   const closeModalBtn = document.querySelector(".close");
@@ -14,13 +15,17 @@ function setupModalHandlers() {
 }
 
 function openModal() {
+  document.body.style.overflow = 'hidden';
   const modal = document.getElementById("competitionModal");
   if (modal) modal.style.display = "flex";
 }
 
 function closeModal() {
+  document.body.style.overflow = '';
   const modal = document.getElementById("competitionModal");
   if (modal) modal.style.display = "none";
+  // Also hide suggestion dropdowns if open
+  hideSuggestions();
 }
 
 function addCompetition() {
@@ -52,6 +57,7 @@ function addCompetition() {
 
 function resetForm() {
   ["compName", "compCategory", "compCollege", "compYear"].forEach(id => document.getElementById(id).value = "");
+  hideSuggestions();
 }
 
 function fetchCompetitions() {
@@ -81,8 +87,17 @@ function fetchCompetitions() {
         colleges: JSON.parse(data.filters.colleges || "[]")
       };
 
+      // Extract unique category names
+      categorySuggestions = [...new Set(categories.map(c => c.name))].sort();
+
+      // Extract unique colleges from competitions
+      collegeSuggestions = [...new Set(categories.flatMap(c => c.competitions.map(comp => comp.college)))].sort();
+
       updateDropdowns();
       updateCategoryTiles();
+
+      // Setup or refresh suggestion dropdowns after data loaded
+      setupSuggestionDropdowns();
     })
     .catch(error => {
       console.error("Fetch Error:", error);
@@ -141,15 +156,14 @@ function updateCategoryTiles(filteredCategories = categories) {
     category.competitions.forEach(competition => {
       const tile = document.createElement("div");
       tile.className = "competition-tile";
-      tile.innerHTML = `
-        <div class="info">
-          <h3> ${competition.name}</h3>
+      tile.innerHTML =
+        `<div class="info">
+          <h3>${competition.name}</h3>
           <p>Category: ${category.name}</p>
           <p>College: ${competition.college}</p>
           <p>Year: ${competition.year}</p>
         </div>
-        <button type="button" onclick="viewCompetition('${competition.id}')">View Competition</button>
-      `;
+        <button type="button" onclick="viewCompetition('${competition.id}')">View Competition</button>`;
       tilesContainer.appendChild(tile);
     });
   });
@@ -159,6 +173,119 @@ function viewCompetition(compId) {
   // Redirect to student.html with the competition id in the query string
   window.location.href = `student.html?compId=${encodeURIComponent(compId)}`;
 }
+
+// Setup filter handlers
+function setupFilterHandlers() {
+  document.getElementById("filterCategory")?.addEventListener("change", filterCompetitions);
+  document.getElementById("filterCollege")?.addEventListener("change", filterCompetitions);
+  document.getElementById("filterYear")?.addEventListener("change", filterCompetitions);
+}
+
+// --- Suggestion dropdown logic starts here ---
+
+// We'll maintain references to dropdown divs globally so we can reuse/hide them.
+let categoryDropdown = null;
+let collegeDropdown = null;
+
+function setupSuggestionDropdowns() {
+  const compCategoryInput = document.getElementById("compCategory");
+  const compCollegeInput = document.getElementById("compCollege");
+
+  // Create dropdown divs if not already created
+  if (!categoryDropdown) {
+    categoryDropdown = createDropdownDiv();
+    document.body.appendChild(categoryDropdown);
+  }
+  if (!collegeDropdown) {
+    collegeDropdown = createDropdownDiv();
+    document.body.appendChild(collegeDropdown);
+  }
+
+  setupInputSuggestionHandlers(compCategoryInput, categorySuggestions, categoryDropdown);
+  setupInputSuggestionHandlers(compCollegeInput, collegeSuggestions, collegeDropdown);
+}
+
+function createDropdownDiv() {
+  const div = document.createElement("div");
+  div.style.position = "absolute";
+  div.style.border = "1px solid #ccc";
+  div.style.backgroundColor = "#fff";
+  div.style.zIndex = "1000";
+  div.style.maxHeight = "150px";
+  div.style.overflowY = "auto";
+  div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.15)";
+  div.style.cursor = "pointer";
+  div.style.fontSize = "14px";
+  div.style.display = "none";
+  div.style.borderRadius = "4px";
+  return div;
+}
+
+function setupInputSuggestionHandlers(inputElem, suggestionsArray, dropdownDiv) {
+  if (!inputElem) return;
+
+  // Show suggestions on focus (full list)
+  inputElem.addEventListener("focus", () => {
+    showSuggestions(inputElem, suggestionsArray, dropdownDiv, "");
+  });
+
+  // Filter suggestions on input
+  inputElem.addEventListener("input", () => {
+    showSuggestions(inputElem, suggestionsArray, dropdownDiv, inputElem.value);
+  });
+
+  // Hide dropdown on blur, with timeout to allow click on options
+  inputElem.addEventListener("blur", () => {
+    setTimeout(() => {
+      hideDropdown(dropdownDiv);
+    }, 200);
+  });
+
+  // Handle clicks on dropdown options (event delegation)
+  dropdownDiv.addEventListener("mousedown", (e) => {
+    e.preventDefault(); // Prevent blur before click event
+    if (e.target && e.target.dataset && e.target.dataset.value) {
+      inputElem.value = e.target.dataset.value;
+      hideDropdown(dropdownDiv);
+    }
+  });
+}
+
+function showSuggestions(inputElem, suggestionsArray, dropdownDiv, filterText) {
+  // Filter suggestions case-insensitive
+  let filtered = suggestionsArray.filter(item =>
+    item.toLowerCase().includes(filterText.toLowerCase())
+  );
+
+  // If no matches, optionally show "No suggestions"
+  if (filtered.length === 0) {
+    dropdownDiv.innerHTML = `<div style="padding:6px;color:#666;">No suggestions</div>`;
+  } else {
+    dropdownDiv.innerHTML = filtered.map(item =>
+      `<div style="padding:6px 10px;" data-value="${item}">${item}</div>`
+    ).join("");
+  }
+
+  // Position dropdown below input
+  const rect = inputElem.getBoundingClientRect();
+  dropdownDiv.style.width = rect.width + "px";
+  dropdownDiv.style.top = window.scrollY + rect.bottom + "px";
+  dropdownDiv.style.left = window.scrollX + rect.left + "px";
+  dropdownDiv.style.display = "block";
+}
+
+function hideDropdown(dropdownDiv) {
+  if (dropdownDiv) {
+    dropdownDiv.style.display = "none";
+  }
+}
+
+function hideSuggestions() {
+  hideDropdown(categoryDropdown);
+  hideDropdown(collegeDropdown);
+}
+
+// --- End suggestion dropdown logic ---
 
 // Event listener for DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -174,10 +301,3 @@ document.addEventListener("DOMContentLoaded", function () {
   setupFilterHandlers();
   fetchCompetitions();
 });
-
-// Setup filter handlers
-function setupFilterHandlers() {
-  document.getElementById("filterCategory")?.addEventListener("change", filterCompetitions);
-  document.getElementById("filterCollege")?.addEventListener("change", filterCompetitions);
-  document.getElementById("filterYear")?.addEventListener("change", filterCompetitions);
-}

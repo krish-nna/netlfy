@@ -87,13 +87,13 @@ window.location.href = downloadUrl;
     function getRankDisplay(rank) {
         // Assuming rank is stored as a string from the enum
         if (rank === "0") {
-            return { text: "Participant", bgClass: "green-bg" };
+            return { text: "Participant", bgClass: "rank-participant" };
         } else if (rank === "1") {
-            return { text: "1st rank", bgClass: "yellow-bg" };
+            return { text: "1st rank", bgClass: "rank-gold" };
         } else if (rank === "2") {
-            return { text: "2nd rank", bgClass: "yellow-bg" };
+            return { text: "2nd rank", bgClass: "rank-silver" };
         } else if (rank === "3") {
-            return { text: "3rd rank", bgClass: "yellow-bg" };
+            return { text: "3rd rank", bgClass: "rank-bronze" };
         } else {
             return { text: rank, bgClass: "yellow-bg" };
         }
@@ -132,60 +132,154 @@ window.location.href = downloadUrl;
     //     });
     // }
 
-        function renderStudents(students) {
-    const container = document.getElementById("categoryTiles");
+//         function renderStudents(students) {
+//     const container = document.getElementById("studinfo");
+//     container.innerHTML = ""; // Clear previous content
+
+//     // Create the table and its header
+//     const table = document.createElement("table");
+//     table.classList.add("students-table");
+  
+
+//     const headerRow = document.createElement("tr");
+//     headerRow.innerHTML = `
+//         <th class="tabelh">Name</th>
+//         <th class="tabelh1">Student ID</th>
+//         <th class="tabelh2">Class</th>
+//         <th class="tabelh3">Division</th>
+//         <th class="tabelh4">Roll No</th>
+//         <th class="tabelh5">Rank</th>
+//         <th class="tabelh6">Email</th>
+//         <th class="tabelh7">Phone</th>
+//         <th class="tabelh8">Edit</th>
+//     `;
+//     table.appendChild(headerRow);
+
+//     // Add a row for each student
+//     students.forEach(student => {
+//         const rankInfo = getRankDisplay(student.rank_status);
+//         const row = document.createElement("tr");
+
+//         row.innerHTML = `
+//             <td class="sdata"><u class="sname">${student.name}</u></td>
+//             <td class="sdata1">${student.student_id}</td>
+//             <td class="sdata2">${student.class}</td>
+//             <td class="sdata3">${student.division}</td>
+//             <td class="sdata4">${student.rollno}</td>
+//             <td class="sdata5"><span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span></td>
+//             <td class="sdata6">${student.email}</td>
+//             <td class="sdata7">${student.phno}</td>
+//             <td class="sdata8">
+//                 <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
+//                     <img class="edit" src="edit.png" alt="Edit">
+//                 </div>
+//             </td>
+//         `;
+
+//         table.appendChild(row);
+//     });
+
+//     // Append the table to the container
+//     container.appendChild(table);
+
+//     // Bind edit button click events
+//     document.querySelectorAll(".edit-btn").forEach(btn => {
+//         btn.addEventListener("click", openEditModal);
+//     });
+// }
+
+function renderStudents(students) {
+    const container = document.getElementById("studinfo");
     container.innerHTML = ""; // Clear previous content
 
-    // Create the table and its header
     const table = document.createElement("table");
     table.classList.add("students-table");
 
     const headerRow = document.createElement("tr");
     headerRow.innerHTML = `
-        <th>Name</th>
-        <th>Student ID</th>
-        <th>Class</th>
-        <th>Division</th>
-        <th>Roll No</th>
-        <th>Rank</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Edit</th>
+        <th class="col-name">Name</th>
+        <th class="col-id">Student ID</th>
+        <th class="col-rank">Rank</th>
+        <th class="col-toggle"></th>
+        <th class="col-class full-only">Class</th>
+        <th class="col-div full-only">Division</th>
+        <th class="col-roll full-only">Roll No</th>
+        <th class="col-email full-only">Email</th>
+        <th class="col-phone full-only">Phone</th>
+        <th class="col-edit full-only">Edit</th>
     `;
     table.appendChild(headerRow);
 
-    // Add a row for each student
-    students.forEach(student => {
+    students.forEach((student, index) => {
         const rankInfo = getRankDisplay(student.rank_status);
         const row = document.createElement("tr");
+        row.classList.add("main-row");
 
         row.innerHTML = `
-            <td><u>${student.name}</u></td>
-            <td>${student.student_id}</td>
-            <td>${student.class}</td>
-            <td>${student.division}</td>
-            <td>${student.rollno}</td>
-            <td><span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span></td>
-            <td>${student.email}</td>
-            <td>${student.phno}</td>
-            <td>
+            <td class="col-name"><u>${student.name}</u></td>
+            <td class="col-id">${student.student_id}</td>
+          
+           
+            <td class="col-class full-only">${student.class}</td>
+            <td class="col-div full-only">${student.division}</td>
+            <td class="col-roll full-only">${student.rollno}</td>
+              <td class="col-rank"><span class="rank-badge ${rankInfo.bgClass}">${rankInfo.text}</span></td>
+               <td class="col-toggle"><button class="toggle-popup" data-index="${index}"><img class="drop" src="drop.png" alt="drop"></button></td>
+            <td class="col-email full-only">${student.email}</td>
+            <td class="col-phone full-only">${student.phno}</td>
+            <td class="col-edit full-only">
                 <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
                     <img class="edit" src="edit.png" alt="Edit">
                 </div>
             </td>
         `;
-
         table.appendChild(row);
+
+        const popupRow = document.createElement("tr");
+        popupRow.classList.add("popup-row");
+        popupRow.setAttribute("data-index", index);
+        popupRow.style.display = "none";
+
+        popupRow.innerHTML = `
+            <td colspan="10">
+                <div class="popup-content">
+                    <p><strong>Class:</strong> ${student.class}</p>
+                    <p><strong>Division:</strong> ${student.division}</p>
+                    <p><strong>Roll No:</strong> ${student.rollno}</p>
+                    <p><strong>Email:</strong> ${student.email}</p>
+                    <p><strong>Phone:</strong> ${student.phno}</p>
+                    <div class="edit-btn" style="border: none; cursor: pointer;" data-tid="${student.tid}">
+                        <img class="edit" src="edit.png" alt="Edit">
+                    </div>
+                </div>
+            </td>
+        `;
+        table.appendChild(popupRow);
     });
 
-    // Append the table to the container
     container.appendChild(table);
+    
 
-    // Bind edit button click events
+    // Handle toggle popup logic
+    document.querySelectorAll(".toggle-popup").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const index = e.currentTarget.getAttribute("data-index");
+            document.querySelectorAll(".popup-row").forEach(row => {
+                if (row.getAttribute("data-index") === index) {
+                    row.style.display = (row.style.display === "table-row") ? "none" : "table-row";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+
+    // Bind edit buttons
     document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.addEventListener("click", openEditModal);
     });
 }
+
 
 
     // Function to update the class dropdown using the master list
@@ -213,20 +307,21 @@ window.location.href = downloadUrl;
     function openEditModal(e) {
         const tid = e.target.closest(".edit-btn").getAttribute("data-tid");
         // Use closest to find the student-card container
-        const tile = e.target.closest(".student-card");
-        if (!tile) {
-            console.error("Tile not found!");
+       const row = e.target.closest("tr");
+        if (!row) {
+            console.error("row not found!");
             return;
         }
+        
 
         // Extract fields using unique class selectors
-        const nameEl = tile.querySelector(".student-name");
-        const classEl = tile.querySelector(".student-class");
-        const divisionEl = tile.querySelector(".student-division");
-        const rollnoEl = tile.querySelector(".student-rollno");
-        const emailEl = tile.querySelector(".email");
-        const phoneEl = tile.querySelector(".student-phone");
-        const rankEl = tile.querySelector("span.rank-badge");
+        const nameEl = row.querySelector(".col-name");
+        const classEl = row.querySelector(".col-class");
+        const divisionEl = row.querySelector(".col-div");
+        const rollnoEl = row.querySelector(".col-roll");
+        const emailEl = row.querySelector(".col-email");
+        const phoneEl = row.querySelector(".col-phone");
+        const rankEl = row.querySelector("span.rank-badge");
 
         const name = nameEl ? nameEl.textContent.replace(/<[^>]*>/g, "").trim() : "";
         const classText = classEl ? classEl.textContent.split(": ")[1] : "";
@@ -235,6 +330,13 @@ window.location.href = downloadUrl;
         const email = emailEl ? emailEl.textContent.split(": ")[1] : "";
         const phoneText = phoneEl ? phoneEl.textContent.split(": ")[1] : "";
         const rank_status = rankEl ? rankEl.textContent : "";
+console.log("Extracted values:");
+console.log("name:", name);
+console.log("classText:", classText);
+console.log("divisionText:", divisionText);
+console.log("rollnoText:", rollnoText);
+console.log("email:", email);
+console.log("phoneText:", phoneText);
 
         if (!name || !classText || !divisionText || !rollnoText || !email || !phoneText) {
             console.error("Some student details are missing!");
